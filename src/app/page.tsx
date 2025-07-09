@@ -31,23 +31,6 @@ export default function Home() {
           categoryIds={['brindes', 'acessorios', 'trava-mista']} 
         />
 
-        {/* Banner promocional */}
-        <section className="p-4">
-          <div className="proboots-banner rounded-lg p-6 text-white text-center">
-            <h2 className="text-xl font-bold mb-2">
-              DESPERTE O CRAQUE QUE EXISTE EM VOCÊ COM NOSSAS CHUTEIRAS!
-            </h2>
-            <p className="text-sm opacity-90 mb-4">
-              PARCELE EM ATÉ 5X SEM JUROS
-            </p>
-            <div className="w-20 h-20 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl">⚽</span>
-            </div>
-          </div>
-        </section>
-
-
-
         {/* Itens para você */}
         <section className="bg-white mt-2">
           <ProductCarousel
