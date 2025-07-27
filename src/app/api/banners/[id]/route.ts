@@ -14,11 +14,12 @@ const writeBanners = async (banners: Banner[]) => {
   await fs.writeFile(dataFilePath, JSON.stringify(banners, null, 2));
 };
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// PUT (update) a banner
+export async function PUT(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const updatedData: Partial<Banner> = await request.json();
-    let banners = await readBanners();
+    const banners = await readBanners();
     const index = banners.findIndex(b => b.id === id);
 
     if (index === -1) {
@@ -30,14 +31,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(banners[index]);
   } catch (error) {
+    console.error(`Failed to update banner ${context.params.id}:`, error);
     return NextResponse.json({ message: 'Error updating banner' }, { status: 500 });
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+// DELETE a banner
+export async function DELETE(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
-    let banners = await readBanners();
+    const { id } = context.params;
+    const banners = await readBanners();
     const filtered = banners.filter(b => b.id !== id);
 
     if (banners.length === filtered.length) {
@@ -47,6 +50,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     await writeBanners(filtered);
     return NextResponse.json({ message: 'Banner deleted' }, { status: 200 });
   } catch (error) {
+    console.error(`Failed to delete banner ${context.params.id}:`, error);
     return NextResponse.json({ message: 'Error deleting banner' }, { status: 500 });
   }
 } 

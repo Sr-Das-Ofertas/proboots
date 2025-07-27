@@ -14,9 +14,9 @@ const writeCategories = async (categories: Category[]) => {
   await fs.writeFile(dataFilePath, JSON.stringify(categories, null, 2));
 };
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const updatedData: Partial<Category> = await request.json();
     let categories = await readCategories();
     const index = categories.findIndex(c => c.id === id);
@@ -34,9 +34,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     let categories = await readCategories();
     const filtered = categories.filter(c => c.id !== id);
 

@@ -17,9 +17,9 @@ const writeProducts = async (products: Product[]) => {
 };
 
 // PUT (update) a product
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const updatedData: Partial<Product> = await request.json();
     
     let products = await readProducts();
@@ -34,15 +34,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(products[productIndex]);
   } catch (error) {
-    console.error(`Failed to update product ${params.id}:`, error);
+    console.error(`Failed to update product ${context.params.id}:`, error);
     return NextResponse.json({ message: 'Error updating product' }, { status: 500 });
   }
 }
 
 // DELETE a product
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     
     let products = await readProducts();
     const filteredProducts = products.filter(p => p.id !== id);
@@ -55,7 +55,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     
     return NextResponse.json({ message: 'Product deleted' }, { status: 200 });
   } catch (error) {
-    console.error(`Failed to delete product ${params.id}:`, error);
+    console.error(`Failed to delete product ${context.params.id}:`, error);
     return NextResponse.json({ message: 'Error deleting product' }, { status: 500 });
   }
 } 
