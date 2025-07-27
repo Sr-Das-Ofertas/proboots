@@ -5,10 +5,10 @@ import { DataStore, type Product } from '@/data/products';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/useCart';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
 
 interface ProductCarouselProps {
   title: string;
@@ -18,8 +18,8 @@ interface ProductCarouselProps {
 
 export function ProductCarousel({ title, type, categoryId }: ProductCarouselProps) {
   const [products, setProducts] = useState<Product[]>([]);
-  const { addItem, formatPrice } = useCart();
   const router = useRouter();
+  const { formatPrice } = useCart();
 
   useEffect(() => {
     const store = DataStore.getInstance();
@@ -97,10 +97,10 @@ export function ProductCarousel({ title, type, categoryId }: ProductCarouselProp
               <Button
                 size="sm"
                 className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => addItem(product)}
+                onClick={() => router.push(`/produto/${product.id}`)}
               >
                 <ShoppingCart className="w-4 h-4 mr-1" />
-                Comprar
+                Ver Detalhes
               </Button>
             </CardContent>
           </Card>

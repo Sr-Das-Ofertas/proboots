@@ -1,83 +1,103 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CartDrawer } from '@/components/products/CartDrawer';
-import { ShoppingCart, Search, Menu } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [cartUpdateTrigger, setCartUpdateTrigger] = useState(0);
   const { cart } = useCart();
-
-  // Escutar mudanças no carrinho
-  useEffect(() => {
-    const handleCartUpdate = () => {
-      setCartUpdateTrigger(prev => prev + 1);
-    };
-
-    window.addEventListener('cart-updated', handleCartUpdate);
-
-    return () => {
-      window.removeEventListener('cart-updated', handleCartUpdate);
-    };
-  }, []);
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
 
   return (
     <>
-      {/* Barra de frete grátis */}
-      <div className="proboots-banner text-white text-center py-2 text-sm">
-        ⚡ Frete grátis para todo o Brasil
-      </div>
-
-      {/* Header principal */}
-      <header className="bg-proboots-red shadow-sm sticky top-0 z-40">
-        <div className="flex items-center justify-between p-4">
-          {/* Menu hamburger (mobile) */}
-          <Button variant="ghost" size="sm" className="md:hidden text-white">
-            <Menu className="w-5 h-5" />
-          </Button>
-
-          {/* Logo */}
-          <div className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="Proboots Logo"
-              className="h-20 w-auto"
-            />
-          </div>
-
-          {/* Carrinho */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsCartOpen(true)}
-            className="relative text-white"
-          >
-            <ShoppingCart className="w-5 h-5" />
-            {cart.itemCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs bg-red-500 text-white">
-                {cart.itemCount}
-              </Badge>
-            )}
-          </Button>
+      <header
+        className={cn(
+          "z-50 text-white",
+          isHomePage
+            ? "absolute top-0 left-0 right-0 bg-transparent"
+            : "sticky top-0 shadow-md"
+        )}
+      >
+        {/* Barra de frete grátis */}
+        <div className={cn(
+          "text-center py-2 text-sm",
+          isHomePage ? "bg-proboots-red/90" : "bg-proboots-red"
+        )}>
+          ⚡ Frete grátis para todo o Brasil
         </div>
 
-        {/* Barra de pesquisa */}
-        <div className="px-4 pb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
-            <Input
-              placeholder="O que está procurando?"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 placeholder:text-gray-300 text-white"
-            />
+        {/* Header principal */}
+        <div className={cn(
+          "transition-all duration-300",
+          isHomePage ? "bg-proboots-red/90" : "bg-proboots-red",
+          isSearchOpen ? 'py-4' : ''
+        )}>
+          <div className="flex items-center justify-between p-4">
+            {/* Menu hamburger (mobile) */}
+            <Button variant="ghost" size="sm" className="md:hidden">
+              <Menu className="w-5 h-5" />
+            </Button>
+
+            {/* Logo */}
+            <div className="flex items-center">
+              <img
+                src="/logo.png"
+                alt="Proboots Logo"
+                className="h-20 w-auto"
+              />
+            </div>
+
+            {/* Ícones da direita */}
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className="relative"
+              >
+                {isSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsCartOpen(true)}
+                className="relative"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cart.itemCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs bg-red-500">
+                    {cart.itemCount}
+                  </Badge>
+                )}
+              </Button>
+            </div>
           </div>
+
+          {/* Barra de pesquisa expansível */}
+          {isSearchOpen && (
+            <div className="px-4 pb-4 animate-fadeIn">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
+                <Input
+                  placeholder="O que está procurando?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white/20 border-white/30 placeholder:text-gray-300"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </header>
 

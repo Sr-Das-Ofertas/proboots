@@ -10,12 +10,14 @@ export default function Home() {
 
       <main className="animate-fadeIn">
         {/* Carrossel de Banners */}
-        <section className="p-4">
+        <section>
           <BannerCarousel />
         </section>
 
         {/* Categorias Principais */}
-        <CategoryGrid categoryIds={['campo', 'society', 'futsal']} />
+        <section className="-mt-12 md:-mt-24 z-10 relative">
+          <CategoryGrid categoryIds={['campo', 'society', 'futsal']} />
+        </section>
 
         {/* Mais Vendidos */}
         <section className="bg-white mt-2">
@@ -53,12 +55,12 @@ export default function Home() {
         </section>
 
         {/* Footer simples */}
-        <footer className="bg-gray-900 text-white p-6 text-center">
+        <footer className="bg-proboots-red text-white p-6 text-center">
           <h3 className="font-bold mb-4">Proboots</h3>
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-sm text-gray-200 mb-4">
             © Proboots - Todos os direitos reservados
           </p>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-300">
             99.985.306.285
           </div>
         </footer>

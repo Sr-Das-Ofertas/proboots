@@ -31,17 +31,19 @@ export default function ProductPage() {
     setProduct(foundProduct || null);
 
     // Carregar URL da imagem de detalhes do localStorage
-    try {
-      const savedImages = localStorage.getItem('proboots-custom-images');
-      if (savedImages) {
-        const images = JSON.parse(savedImages);
-        setDetailsImageUrl(images.detalhes || 'https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
-      } else {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedImages = localStorage.getItem('proboots-custom-images');
+        if (savedImages) {
+          const images = JSON.parse(savedImages);
+          setDetailsImageUrl(images.detalhes || 'https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
+        } else {
+          setDetailsImageUrl('https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar imagem de detalhes:', error);
         setDetailsImageUrl('https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
       }
-    } catch (error) {
-      console.error('Erro ao carregar imagem de detalhes:', error);
-      setDetailsImageUrl('https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
     }
   }, [params.id]);
 

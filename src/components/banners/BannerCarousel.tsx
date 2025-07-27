@@ -1,13 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DataStore, type Banner } from '@/data/products';
-import { Card } from '@/components/ui/card';
 import Image from 'next/image';
+import useEmblaCarousel from 'embla-carousel-react';
 
 export function BannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const updateCurrentIndex = useCallback(() => {
+    if (emblaApi) {
+      setCurrentIndex(emblaApi.selectedScrollSnap());
+    }
+  }, [emblaApi]);
 
   useEffect(() => {
     const store = DataStore.getInstance();
@@ -15,50 +22,47 @@ export function BannerCarousel() {
   }, []);
 
   useEffect(() => {
-    if (banners.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % banners.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [banners.length]);
+    if (!emblaApi) return;
+    emblaApi.on('select', updateCurrentIndex);
+    return () => {
+      emblaApi.off('select', updateCurrentIndex);
+    };
+  }, [emblaApi, updateCurrentIndex]);
+  
+  const scrollTo = useCallback((index: number) => {
+    emblaApi?.scrollTo(index);
+  }, [emblaApi]);
 
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative w-full h-48 md:h-64 overflow-hidden rounded-lg">
-      {banners.map((banner, index) => (
-        <div
-          key={banner.id}
-          className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
-            index === currentIndex ? 'translate-x-0' :
-            index < currentIndex ? '-translate-x-full' : 'translate-x-full'
-          }`}
-        >
-          <div className="relative w-full h-full">
-            <Image
-              src={banner.image}
-              alt={banner.title}
-              fill
-              className="object-cover"
-              priority={index === 0}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-            <div className="absolute bottom-4 left-4 text-white">
-              <h3 className="text-lg font-bold">{banner.title}</h3>
+    <div className="relative w-full h-screen md:h-96 overflow-hidden" ref={emblaRef}>
+      <div className="flex h-full">
+        {banners.map((banner, index) => (
+          <div
+            key={banner.id}
+            className="flex-shrink-0 w-full h-full relative"
+          >
+            <div className="relative w-full h-full">
+              <Image
+                src={banner.image}
+                alt={banner.title}
+                fill
+                className="object-contain"
+                priority={index === 0}
+              />
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {/* Indicadores */}
-      <div className="absolute bottom-2 right-2 flex space-x-2">
-        {banners.map((banner, index) => (
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+        {banners.map((_, index) => (
           <button
-            key={banner.id}
-            onClick={() => setCurrentIndex(index)}
-            className={`w-2 h-2 rounded-full transition-colors ${
+            key={index}
+            onClick={() => scrollTo(index)}
+            className={`w-2.5 h-2.5 rounded-full transition-colors ${
               index === currentIndex ? 'bg-white' : 'bg-white/50'
             }`}
           />

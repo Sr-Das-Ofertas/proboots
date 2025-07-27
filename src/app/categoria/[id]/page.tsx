@@ -155,15 +155,16 @@ export default function CategoryPage() {
                       )}
                     </div>
 
-                    <Button
-                      size="sm"
-                      className="w-full bg-red-600 hover:bg-red-700"
-                      onClick={() => addItem(product)}
-                      disabled={!product.inStock}
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-1" />
-                      {product.inStock ? 'Comprar' : 'Indisponível'}
-                    </Button>
+                    <div className="mt-4 flex flex-col gap-2">
+                      <Button
+                        size="sm"
+                        className="w-full bg-red-600 hover:bg-red-700"
+                        onClick={() => router.push(`/produto/${product.id}`)}
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
