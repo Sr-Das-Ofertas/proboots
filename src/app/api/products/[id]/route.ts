@@ -22,7 +22,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { id } = params;
     const updatedData: Partial<Product> = await request.json();
     
-    let products = await readProducts();
+    const products = await readProducts();
     const productIndex = products.findIndex(p => p.id === id);
 
     if (productIndex === -1) {
@@ -44,7 +44,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   try {
     const { id } = params;
     
-    let products = await readProducts();
+    const products = await readProducts();
     const filteredProducts = products.filter(p => p.id !== id);
 
     if (products.length === filteredProducts.length) {
