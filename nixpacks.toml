@@ -1,4 +1,4 @@
 # Força o ambiente de deploy a usar uma versão específica do Bun
 # Isso garante que o bun.lock seja respeitado e as dependências sejam consistentes.
-[providers]
-bun = "1.2.16" 
+[variables]
+BUN_VERSION = "1.2.16" 
