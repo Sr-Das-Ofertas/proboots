@@ -1,4 +1,7 @@
-# Força o ambiente de deploy a usar uma versão específica do Bun
-# Isso garante que o bun.lock seja respeitado e as dependências sejam consistentes.
+f# Força o ambiente de deploy a usar uma versão específica do Bun
+# e a usar o `bun.lock` de forma estrita.
+[phases.install]
+cmds = ["bun i --frozen-lockfile"]
+
 [variables]
 BUN_VERSION = "1.2.16" 
