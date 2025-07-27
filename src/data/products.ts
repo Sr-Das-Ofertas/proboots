@@ -1,3 +1,5 @@
+import dbData from '../../db.json';
+
 export interface Product {
   id: string;
   name: string;
@@ -30,138 +32,17 @@ export interface Banner {
   active: boolean;
 }
 
-// Dados iniciais
-export const initialBanners: Banner[] = [
-  {
-    id: "1",
-    title: "Chuteiras de Campo",
-    image: "https://ext.same-assets.com/4023899342/1707337737.jpeg",
-    active: true
-  },
-  {
-    id: "2",
-    title: "Society Collection",
-    image: "https://ext.same-assets.com/4023899342/1504921622.jpeg",
-    active: true
-  },
-  {
-    id: "3",
-    title: "Futsal Line",
-    image: "https://ext.same-assets.com/4023899342/929125204.jpeg",
-    active: true
-  }
-];
-
-export const initialCategories: Category[] = [
-  {
-    id: "campo",
-    name: "Campo",
-    image: "/banner3.png",
-    description: "Chuteiras para futebol de campo",
-    productIds: ["1", "2"]
-  },
-  {
-    id: "society",
-    name: "Society",
-    image: "/banner5.png",
-    description: "Chuteiras para futebol society",
-    productIds: ["3"]
-  },
-  {
-    id: "futsal",
-    name: "Futsal",
-    image: "/banner1.png",
-    description: "Chuteiras para futsal",
-    productIds: []
-  },
-  {
-    id: "brindes",
-    name: "Chuteira + Brindes",
-    image: "/banner4.png",
-    description: "Combos especiais de chuteiras com brindes",
-    productIds: []
-  },
-  {
-    id: "acessorios",
-    name: "Acessórios",
-    image: "/banner2.png",
-    description: "Luvas, meiões, bolsas e mais",
-    productIds: []
-  },
-  {
-    id: "trava-mista",
-    name: "Trava Mista",
-    image: "/banner6.png",
-    description: "Chuteiras para campos macios ou úmidos",
-    productIds: []
-  }
-];
-
-export const initialProducts: Product[] = [
-  {
-    id: "1",
-    name: "Nike Mercurial Air Zoom Superfly X Elite FG",
-    price: 54999,
-    originalPrice: 179900,
-    discount: 69,
-    description: "Chuteira de campo profissional com tecnologia Nike Air Zoom",
-    images: [
-      "https://ext.same-assets.com/4023899342/3098715259.jpeg",
-      "https://ext.same-assets.com/4023899342/96348537.jpeg"
-    ],
-    coverImage: "https://ext.same-assets.com/4023899342/3098715259.jpeg",
-    category: "campo",
-    inStock: true,
-    featured: true,
-    bestSeller: true,
-    forYou: false
-  },
-  {
-    id: "2",
-    name: "Nike Phantom GX II Elite FG",
-    price: 48399,
-    originalPrice: 179900,
-    discount: 69,
-    description: "Chuteira elite para controle e precisão máxima",
-    images: [
-      "https://ext.same-assets.com/4023899342/2762738962.jpeg",
-      "https://ext.same-assets.com/4023899342/3966987016.jpeg"
-    ],
-    coverImage: "https://ext.same-assets.com/4023899342/2762738962.jpeg",
-    category: "campo",
-    inStock: true,
-    featured: true,
-    bestSeller: true,
-    forYou: true
-  },
-  {
-    id: "3",
-    name: "Joma TopFlex Rebound",
-    price: 43119,
-    originalPrice: 9799,
-    discount: 51,
-    description: "Chuteira com excelente custo-benefício",
-    images: [
-      "https://ext.same-assets.com/4023899342/229197584.jpeg"
-    ],
-    coverImage: "https://ext.same-assets.com/4023899342/229197584.jpeg",
-    category: "society",
-    inStock: true,
-    featured: false,
-    bestSeller: false,
-    forYou: true
-  }
-];
-
-// Store em memória (será substituído por banco de dados real)
+// Store em memória que lê do db.json e salva via API
 export class DataStore {
   private static instance: DataStore;
-  private banners: Banner[] = [...initialBanners];
-  private categories: Category[] = [...initialCategories];
-  private products: Product[] = [...initialProducts];
+  private banners: Banner[];
+  private categories: Category[];
+  private products: Product[];
 
   constructor() {
-    this.loadFromStorage();
+    this.banners = dbData.banners;
+    this.categories = dbData.categories;
+    this.products = dbData.products;
   }
 
   static getInstance(): DataStore {
@@ -171,35 +52,27 @@ export class DataStore {
     return DataStore.instance;
   }
 
-  // Carregar dados do localStorage
-  private loadFromStorage() {
+  // Salvar o estado completo no db.json via API
+  private async saveState() {
     try {
-      const savedBanners = localStorage.getItem('proboots-banners');
-      const savedCategories = localStorage.getItem('proboots-categories');
-      const savedProducts = localStorage.getItem('proboots-products');
+      const response = await fetch('/api/update-db', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          banners: this.banners,
+          categories: this.categories,
+          products: this.products,
+        }),
+      });
 
-      if (savedBanners) {
-        this.banners = JSON.parse(savedBanners);
-      }
-      if (savedCategories) {
-        this.categories = JSON.parse(savedCategories);
-      }
-      if (savedProducts) {
-        this.products = JSON.parse(savedProducts);
+      if (!response.ok) {
+        throw new Error('Falha ao salvar os dados no servidor.');
       }
     } catch (error) {
-      console.error('Erro ao carregar dados do localStorage:', error);
-    }
-  }
-
-  // Salvar dados no localStorage
-  private saveToStorage() {
-    try {
-      localStorage.setItem('proboots-banners', JSON.stringify(this.banners));
-      localStorage.setItem('proboots-categories', JSON.stringify(this.categories));
-      localStorage.setItem('proboots-products', JSON.stringify(this.products));
-    } catch (error) {
-      console.error('Erro ao salvar dados no localStorage:', error);
+      console.error('Erro ao salvar o estado:', error);
+      // Opcional: Adicionar lógica para notificar o usuário do erro
     }
   }
 
@@ -221,26 +94,26 @@ export class DataStore {
     return this.banners;
   }
 
-  addBanner(banner: Omit<Banner, 'id'>): Banner {
+  async addBanner(banner: Omit<Banner, 'id'>): Promise<Banner> {
     const newBanner = { ...banner, id: Date.now().toString() };
     this.banners.push(newBanner);
-    this.saveToStorage();
+    await this.saveState();
     return newBanner;
   }
 
-  updateBanner(id: string, updates: Partial<Banner>): Banner | null {
+  async updateBanner(id: string, updates: Partial<Banner>): Promise<Banner | null> {
     const index = this.banners.findIndex(b => b.id === id);
     if (index === -1) return null;
     this.banners[index] = { ...this.banners[index], ...updates };
-    this.saveToStorage();
+    await this.saveState();
     return this.banners[index];
   }
 
-  deleteBanner(id: string): boolean {
+  async deleteBanner(id: string): Promise<boolean> {
     const index = this.banners.findIndex(b => b.id === id);
     if (index === -1) return false;
     this.banners.splice(index, 1);
-    this.saveToStorage();
+    await this.saveState();
     return true;
   }
 
@@ -250,22 +123,22 @@ export class DataStore {
     return this.categories;
   }
 
-  addCategory(category: Omit<Category, 'id'>): Category {
+  async addCategory(category: Omit<Category, 'id'>): Promise<Category> {
     const newCategory = { ...category, id: Date.now().toString() };
     this.categories.push(newCategory);
-    this.saveToStorage();
+    await this.saveState();
     return newCategory;
   }
 
-  updateCategory(id: string, updates: Partial<Category>): Category | null {
+  async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
     const index = this.categories.findIndex(c => c.id === id);
     if (index === -1) return null;
     this.categories[index] = { ...this.categories[index], ...updates };
-    this.saveToStorage();
+    await this.saveState();
     return this.categories[index];
   }
 
-  deleteCategory(id: string): boolean {
+  async deleteCategory(id: string): Promise<boolean> {
     const index = this.categories.findIndex(c => c.id === id);
     if (index === -1) return false;
 
@@ -277,7 +150,7 @@ export class DataStore {
     }
 
     this.categories.splice(index, 1);
-    this.saveToStorage();
+    await this.saveState();
     return true;
   }
 
@@ -298,29 +171,29 @@ export class DataStore {
     return this.products.filter(p => p.category === categoryId);
   }
 
-  addProduct(product: Omit<Product, 'id'>): Product {
+  async addProduct(product: Omit<Product, 'id'>): Promise<Product> {
     const newProduct = { ...product, id: Date.now().toString() };
     this.products.push(newProduct);
     this.syncProductsWithCategories();
-    this.saveToStorage();
+    await this.saveState();
     return newProduct;
   }
 
-  updateProduct(id: string, updates: Partial<Product>): Product | null {
+  async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
     const index = this.products.findIndex(p => p.id === id);
     if (index === -1) return null;
     this.products[index] = { ...this.products[index], ...updates };
     this.syncProductsWithCategories();
-    this.saveToStorage();
+    await this.saveState();
     return this.products[index];
   }
 
-  deleteProduct(id: string): boolean {
+  async deleteProduct(id: string): Promise<boolean> {
     const index = this.products.findIndex(p => p.id === id);
     if (index === -1) return false;
     this.products.splice(index, 1);
     this.syncProductsWithCategories();
-    this.saveToStorage();
+    await this.saveState();
     return true;
   }
 }
