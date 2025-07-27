@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore, type Category } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import type { Category } from '@/data/products';
 
 export function CategoryManagement() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -23,17 +23,19 @@ export function CategoryManagement() {
     loadCategories();
   }, []);
 
-  const loadCategories = () => {
-    const store = DataStore.getInstance();
-    setCategories(store.getCategories());
+  const loadCategories = async () => {
+    try {
+      const response = await fetch('/api/categories');
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      image: ''
-    });
+    setFormData({ name: '', description: '', image: '' });
     setEditingCategory(null);
   };
 
@@ -56,42 +58,43 @@ export function CategoryManagement() {
     resetForm();
   };
 
-  const handleSave = () => {
-    const store = DataStore.getInstance();
+  const handleSave = async () => {
+    const url = editingCategory ? `/api/categories/${editingCategory.id}` : '/api/categories';
+    const method = editingCategory ? 'PUT' : 'POST';
 
     const categoryData = {
       name: formData.name,
       description: formData.description,
       image: formData.image,
-      productIds: editingCategory?.productIds || []
     };
 
-    if (editingCategory) {
-      store.updateCategory(editingCategory.id, categoryData);
-    } else {
-      store.addCategory(categoryData);
-    }
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryData)
+      });
 
-    loadCategories();
-    closeDialog();
+      if (!response.ok) throw new Error('Failed to save category');
+      
+      await loadCategories();
+      closeDialog();
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao salvar categoria.');
+    }
   };
 
-  const handleDelete = (categoryId: string) => {
+  const handleDelete = async (categoryId: string) => {
     if (confirm('Tem certeza que deseja excluir esta categoria?')) {
-      const store = DataStore.getInstance();
-      store.deleteCategory(categoryId);
-      loadCategories();
-    }
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Em uma implementação real, você faria upload para um serviço de storage
-      // Por enquanto, vamos simular com uma URL
-      const fakeUrl = `https://example.com/uploaded/${file.name}`;
-      setFormData({...formData, image: fakeUrl});
-      alert('Upload simulado! Em produção, integraria com serviço de storage.');
+      try {
+        const response = await fetch(`/api/categories/${categoryId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete category');
+        await loadCategories();
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao excluir categoria.');
+      }
     }
   };
 
@@ -133,23 +136,6 @@ export function CategoryManagement() {
                   value={formData.image}
                   onChange={(e) => setFormData({...formData, image: e.target.value})}
                 />
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">ou</span>
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                    <Button variant="outline" size="sm" asChild>
-                      <span>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload
-                      </span>
-                    </Button>
-                  </label>
-                </div>
                 {formData.image && (
                   <img
                     src={formData.image}
@@ -185,10 +171,7 @@ export function CategoryManagement() {
                 <div>
                   <h3 className="font-semibold text-lg">{category.name}</h3>
                   <p className="text-sm text-gray-600">{category.description}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {category.productIds.length} produto(s)
-                  </p>
-                  <Button
+                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => window.open(`/categoria/${category.id}`, '_blank')}

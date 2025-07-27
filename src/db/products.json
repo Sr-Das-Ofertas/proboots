@@ -1,0 +1,55 @@
+[
+  {
+    "id": "1",
+    "name": "Nike Mercurial Air Zoom Superfly X Elite FG",
+    "price": 54999,
+    "originalPrice": 179900,
+    "discount": 69,
+    "description": "Chuteira de campo profissional com tecnologia Nike Air Zoom",
+    "images": [
+      "https://ext.same-assets.com/4023899342/3098715259.jpeg",
+      "https://ext.same-assets.com/4023899342/96348537.jpeg"
+    ],
+    "coverImage": "https://ext.same-assets.com/4023899342/3098715259.jpeg",
+    "category": "campo",
+    "inStock": true,
+    "featured": true,
+    "bestSeller": true,
+    "forYou": false
+  },
+  {
+    "id": "2",
+    "name": "Nike Phantom GX II Elite FG",
+    "price": 48399,
+    "originalPrice": 179900,
+    "discount": 69,
+    "description": "Chuteira elite para controle e precisão máxima",
+    "images": [
+      "https://ext.same-assets.com/4023899342/2762738962.jpeg",
+      "https://ext.same-assets.com/4023899342/3966987016.jpeg"
+    ],
+    "coverImage": "https://ext.same-assets.com/4023899342/2762738962.jpeg",
+    "category": "campo",
+    "inStock": true,
+    "featured": true,
+    "bestSeller": true,
+    "forYou": true
+  },
+  {
+    "id": "3",
+    "name": "Joma TopFlex Rebound",
+    "price": 43119,
+    "originalPrice": 9799,
+    "discount": 51,
+    "description": "Chuteira com excelente custo-benefício",
+    "images": [
+      "https://ext.same-assets.com/4023899342/229197584.jpeg"
+    ],
+    "coverImage": "https://ext.same-assets.com/4023899342/229197584.jpeg",
+    "category": "society",
+    "inStock": true,
+    "featured": false,
+    "bestSeller": false,
+    "forYou": true
+  }
+] 

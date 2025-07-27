@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore, type Product, type Category } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import type { Product, Category } from '@/data/products';
 
 export function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -34,25 +34,29 @@ export function ProductManagement() {
     loadData();
   }, []);
 
-  const loadData = () => {
-    const store = DataStore.getInstance();
-    setProducts(store.getProducts());
-    setCategories(store.getCategories());
+  const loadData = async () => {
+    try {
+      const [productsRes, categoriesRes] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/categories')
+      ]);
+      if (!productsRes.ok || !categoriesRes.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const productsData = await productsRes.json();
+      const categoriesData = await categoriesRes.json();
+      setProducts(productsData);
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      price: '',
-      originalPrice: '',
-      description: '',
-      coverImage: '',
-      images: '',
-      category: '',
-      inStock: true,
-      featured: false,
-      bestSeller: false,
-      forYou: false
+      name: '', price: '', originalPrice: '', description: '',
+      coverImage: '', images: '', category: '', inStock: true,
+      featured: false, bestSeller: false, forYou: false
     });
     setEditingProduct(null);
   };
@@ -84,8 +88,9 @@ export function ProductManagement() {
     resetForm();
   };
 
-  const handleSave = () => {
-    const store = DataStore.getInstance();
+  const handleSave = async () => {
+    const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
+    const method = editingProduct ? 'PUT' : 'POST';
 
     const productData = {
       name: formData.name,
@@ -103,21 +108,31 @@ export function ProductManagement() {
       forYou: formData.forYou
     };
 
-    if (editingProduct) {
-      store.updateProduct(editingProduct.id, productData);
-    } else {
-      store.addProduct(productData);
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productData)
+      });
+      if (!response.ok) throw new Error('Failed to save product');
+      await loadData();
+      closeDialog();
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao salvar produto.');
     }
-
-    loadData();
-    closeDialog();
   };
 
-  const handleDelete = (productId: string) => {
+  const handleDelete = async (productId: string) => {
     if (confirm('Tem certeza que deseja excluir este produto?')) {
-      const store = DataStore.getInstance();
-      store.deleteProduct(productId);
-      loadData();
+      try {
+        const response = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete product');
+        await loadData();
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao excluir produto.');
+      }
     }
   };
 

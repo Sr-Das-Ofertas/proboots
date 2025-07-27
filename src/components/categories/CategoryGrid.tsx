@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore, type Category } from '@/data/products';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+import type { Category } from '@/data/products';
 
 interface CategoryGridProps {
   categoryIds: string[];
@@ -14,14 +14,22 @@ export function CategoryGrid({ categoryIds, title }: CategoryGridProps) {
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    const store = DataStore.getInstance();
-    const allCategories = store.getCategories();
-    
-    const filteredAndOrdered = categoryIds
-      .map(id => allCategories.find(cat => cat.id === id))
-      .filter((cat): cat is Category => cat !== undefined);
-      
-    setCategories(filteredAndOrdered);
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/categories');
+        if (!res.ok) throw new Error('Failed to fetch categories');
+        const allCategories = await res.json();
+        
+        const filteredAndOrdered = categoryIds
+          .map(id => allCategories.find((cat: Category) => cat.id === id))
+          .filter((cat): cat is Category => cat !== undefined);
+          
+        setCategories(filteredAndOrdered);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchCategories();
   }, [categoryIds]);
 
   if (categories.length === 0) {

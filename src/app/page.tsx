@@ -10,12 +10,12 @@ export default function Home() {
 
       <main className="animate-fadeIn">
         {/* Carrossel de Banners */}
-        <section>
+        <section className="md:hidden">
           <BannerCarousel />
         </section>
 
         {/* Categorias Principais */}
-        <section className="-mt-12 md:-mt-24 z-10 relative">
+        <section className="-mt-12 z-10 relative md:mt-0 md:pt-40">
           <CategoryGrid categoryIds={['campo', 'society', 'futsal']} />
         </section>
 

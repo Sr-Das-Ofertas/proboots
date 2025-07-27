@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore, type Banner } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Upload, Eye, EyeOff } from 'lucide-react';
+import type { Banner } from '@/data/products';
 
 export function BannerManagement() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -24,9 +24,15 @@ export function BannerManagement() {
     loadBanners();
   }, []);
 
-  const loadBanners = () => {
-    const store = DataStore.getInstance();
-    setBanners(store.getAllBanners());
+  const loadBanners = async () => {
+    try {
+      const response = await fetch('/api/banners/all');
+      if (!response.ok) throw new Error('Failed to fetch banners');
+      const data = await response.json();
+      setBanners(data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const resetForm = () => {
@@ -59,48 +65,64 @@ export function BannerManagement() {
     resetForm();
   };
 
-  const handleSave = () => {
-    const store = DataStore.getInstance();
+  const handleSave = async () => {
+    const url = editingBanner ? `/api/banners/${editingBanner.id}` : '/api/banners';
+    const method = editingBanner ? 'PUT' : 'POST';
 
-    const bannerData = {
-      title: formData.title,
-      image: formData.image,
-      link: formData.link || undefined,
-      active: formData.active
-    };
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          image: formData.image,
+          link: formData.link || undefined,
+          active: formData.active
+        })
+      });
 
-    if (editingBanner) {
-      store.updateBanner(editingBanner.id, bannerData);
-    } else {
-      store.addBanner(bannerData);
+      if (!response.ok) throw new Error('Failed to save banner');
+      
+      await loadBanners();
+      closeDialog();
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao salvar banner. Verifique o console.');
     }
-
-    loadBanners();
-    closeDialog();
   };
 
-  const handleDelete = (bannerId: string) => {
+  const handleDelete = async (bannerId: string) => {
     if (confirm('Tem certeza que deseja excluir este banner?')) {
-      const store = DataStore.getInstance();
-      store.deleteBanner(bannerId);
-      loadBanners();
+      try {
+        const response = await fetch(`/api/banners/${bannerId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete banner');
+        await loadBanners();
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao excluir banner. Verifique o console.');
+      }
     }
   };
 
-  const toggleActive = (banner: Banner) => {
-    const store = DataStore.getInstance();
-    store.updateBanner(banner.id, { active: !banner.active });
-    loadBanners();
+  const toggleActive = async (banner: Banner) => {
+    try {
+      const response = await fetch(`/api/banners/${banner.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !banner.active })
+      });
+      if (!response.ok) throw new Error('Failed to toggle banner status');
+      await loadBanners();
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao alterar status do banner. Verifique o console.');
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Em uma implementação real, você faria upload para um serviço de storage
-      // Por enquanto, vamos simular com uma URL
-      const fakeUrl = `https://example.com/uploaded/${file.name}`;
-      setFormData({...formData, image: fakeUrl});
-      alert('Upload simulado! Em produção, integraria com serviço de storage.');
+      alert('Upload de imagem ainda não implementado. Por favor, insira a URL da imagem diretamente.');
     }
   };
 
@@ -136,24 +158,7 @@ export function BannerManagement() {
                   value={formData.image}
                   onChange={(e) => setFormData({...formData, image: e.target.value})}
                 />
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">ou</span>
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                    <Button variant="outline" size="sm" asChild>
-                      <span>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload
-                      </span>
-                    </Button>
-                  </label>
-                </div>
-                {formData.image && (
+                 {formData.image && (
                   <img
                     src={formData.image}
                     alt="Preview"

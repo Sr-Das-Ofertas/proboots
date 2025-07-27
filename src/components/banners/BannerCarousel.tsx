@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { DataStore, type Banner } from '@/data/products';
 import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
+import type { Banner } from '@/data/products';
 
 export function BannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -17,8 +17,17 @@ export function BannerCarousel() {
   }, [emblaApi]);
 
   useEffect(() => {
-    const store = DataStore.getInstance();
-    setBanners(store.getBanners());
+    const fetchBanners = async () => {
+      try {
+        const res = await fetch('/api/banners');
+        if (!res.ok) throw new Error('Failed to fetch banners');
+        const data = await res.json();
+        setBanners(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchBanners();
   }, []);
 
   useEffect(() => {

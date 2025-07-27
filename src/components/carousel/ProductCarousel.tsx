@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore, type Product } from '@/data/products';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
+import type { Product } from '@/data/products';
 
 interface ProductCarouselProps {
   title: string;
@@ -22,25 +22,32 @@ export function ProductCarousel({ title, type, categoryId }: ProductCarouselProp
   const { formatPrice } = useCart();
 
   useEffect(() => {
-    const store = DataStore.getInstance();
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('/api/products');
+        if (!res.ok) throw new Error('Failed to fetch products');
+        const allProducts: Product[] = await res.json();
 
-    let productList: Product[] = [];
-
-    switch (type) {
-      case 'bestSeller':
-        productList = store.getBestSellers();
-        break;
-      case 'forYou':
-        productList = store.getForYouProducts();
-        break;
-      case 'category':
-        if (categoryId) {
-          productList = store.getProductsByCategory(categoryId);
+        let productList: Product[] = [];
+        switch (type) {
+          case 'bestSeller':
+            productList = allProducts.filter(p => p.bestSeller);
+            break;
+          case 'forYou':
+            productList = allProducts.filter(p => p.forYou);
+            break;
+          case 'category':
+            if (categoryId) {
+              productList = allProducts.filter(p => p.category === categoryId);
+            }
+            break;
         }
-        break;
-    }
-
-    setProducts(productList);
+        setProducts(productList);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchProducts();
   }, [type, categoryId]);
 
   if (products.length === 0) return null;
@@ -97,7 +104,10 @@ export function ProductCarousel({ title, type, categoryId }: ProductCarouselProp
               <Button
                 size="sm"
                 className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => router.push(`/produto/${product.id}`)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/produto/${product.id}`);
+                }}
               >
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 Ver Detalhes

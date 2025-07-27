@@ -2,50 +2,56 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { DataStore, type Product } from '@/data/products';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/useCart';
 import { ArrowLeft, ShoppingCart, Heart, Share2, Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
+import type { Product } from '@/data/products';
 
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
-  const [detailsImageUrl, setDetailsImageUrl] = useState('');
   const { addItem, formatPrice } = useCart();
 
   const sizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44'];
 
   useEffect(() => {
-    const store = DataStore.getInstance();
-    const productId = params.id as string;
-
-    const products = store.getProducts();
-    const foundProduct = products.find(p => p.id === productId);
-    setProduct(foundProduct || null);
-
-    // Carregar URL da imagem de detalhes do localStorage
-    if (typeof window !== 'undefined') {
+    const fetchProduct = async () => {
+      if (!params.id) return;
+      setLoading(true);
       try {
-        const savedImages = localStorage.getItem('proboots-custom-images');
-        if (savedImages) {
-          const images = JSON.parse(savedImages);
-          setDetailsImageUrl(images.detalhes || 'https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
-        } else {
-          setDetailsImageUrl('https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
-        }
+        const res = await fetch('/api/products');
+        if (!res.ok) throw new Error('Failed to fetch products');
+        const products: Product[] = await res.json();
+        const foundProduct = products.find(p => p.id === params.id);
+        setProduct(foundProduct || null);
       } catch (error) {
-        console.error('Erro ao carregar imagem de detalhes:', error);
-        setDetailsImageUrl('https://media.discordapp.net/attachments/1221867569460543508/1390175868747382906/detalhes.png?ex=68674dab&is=6865fc2b&hm=e6d78b21750231ad8f249364e33282b37026a4b9ef8ddcd00b7da36dadac2b17&=&format=webp&quality=lossless&width=112&height=891');
+        console.error(error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+    fetchProduct();
   }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center pt-32">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -244,33 +250,6 @@ export default function ProductPage() {
           <p className="text-gray-700 leading-relaxed mb-4">
             {product.description}
           </p>
-
-          {/* Imagem de detalhes do produto */}
-          {detailsImageUrl && (
-            <div className="mt-6">
-              <img
-                src={detailsImageUrl}
-                alt="Detalhes do produto"
-                className="w-full rounded-lg object-contain"
-                onError={(e) => {
-                  // Fallback para informações técnicas se a imagem não carregar
-                  const target = e.target as HTMLImageElement;
-                  const fallback = document.createElement('div');
-                  fallback.className = 'mt-6 bg-gray-50 p-4 rounded-lg';
-                  fallback.innerHTML = `
-                    <h4 class="font-semibold mb-3">Características Técnicas:</h4>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                      <div><span class="font-medium">Material:</span><p class="text-gray-600">Sintético de alta qualidade</p></div>
-                      <div><span class="font-medium">Solado:</span><p class="text-gray-600">Borracha antiderrapante</p></div>
-                      <div><span class="font-medium">Tecnologia:</span><p class="text-gray-600">Absorção de impacto</p></div>
-                      <div><span class="font-medium">Indicação:</span><p class="text-gray-600 capitalize">${product.category}</p></div>
-                    </div>
-                  `;
-                  target.parentNode?.replaceChild(fallback, target);
-                }}
-              />
-            </div>
-          )}
         </div>
 
         {/* Especificações */}
