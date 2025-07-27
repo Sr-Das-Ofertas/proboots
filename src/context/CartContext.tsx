@@ -44,13 +44,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Carregar carrinho do localStorage na inicialização
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      try {
-        const savedCart = localStorage.getItem('proboots-cart');
-        if (savedCart) {
-          setCart(JSON.parse(savedCart));
-        }
-      } catch (error) {
-        console.error('Erro ao carregar carrinho:', error);
+    try {
+      const savedCart = localStorage.getItem('proboots-cart');
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar carrinho:', error);
       }
     }
   }, []);
@@ -58,10 +58,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Salvar carrinho no localStorage sempre que mudar
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('proboots-cart', JSON.stringify(cart));
-      } catch (error) {
-        console.error('Erro ao salvar carrinho:', error);
+    try {
+      localStorage.setItem('proboots-cart', JSON.stringify(cart));
+    } catch (error) {
+      console.error('Erro ao salvar carrinho:', error);
       }
     }
   }, [cart]);

@@ -18,7 +18,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     const { id } = params;
     const updatedData: Partial<Banner> = await request.json();
-    const banners = await readBanners();
+    let banners = await readBanners();
     const index = banners.findIndex(b => b.id === id);
 
     if (index === -1) {
@@ -37,7 +37,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
-    const banners = await readBanners();
+    let banners = await readBanners();
     const filtered = banners.filter(b => b.id !== id);
 
     if (banners.length === filtered.length) {

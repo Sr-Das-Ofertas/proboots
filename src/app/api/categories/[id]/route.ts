@@ -18,7 +18,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     const { id } = params;
     const updatedData: Partial<Category> = await request.json();
-    const categories = await readCategories();
+    let categories = await readCategories();
     const index = categories.findIndex(c => c.id === id);
 
     if (index === -1) {
@@ -37,7 +37,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
-    const categories = await readCategories();
+    let categories = await readCategories();
     const filtered = categories.filter(c => c.id !== id);
 
     if (categories.length === filtered.length) {
