@@ -13,6 +13,7 @@ export function BannerManagement() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     image: '',
@@ -26,12 +27,15 @@ export function BannerManagement() {
 
   const loadBanners = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/banners/all');
       if (!response.ok) throw new Error('Failed to fetch banners');
       const data = await response.json();
       setBanners(data);
     } catch (error) {
-      console.error(error);
+      console.error('Error loading banners:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,46 +70,61 @@ export function BannerManagement() {
   };
 
   const handleSave = async () => {
+    if (!formData.title || !formData.image) {
+      alert('Título e imagem são obrigatórios!');
+      return;
+    }
+
     const url = editingBanner ? `/api/banners/${editingBanner.id}` : '/api/banners';
     const method = editingBanner ? 'PUT' : 'POST';
 
     try {
+      setIsLoading(true);
       const response = await fetch(url, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-      title: formData.title,
-      image: formData.image,
-      link: formData.link || undefined,
-      active: formData.active
+          title: formData.title,
+          image: formData.image,
+          link: formData.link || undefined,
+          active: formData.active
         })
       });
 
-      if (!response.ok) throw new Error('Failed to save banner');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save banner');
+      }
       
       await loadBanners();
-    closeDialog();
+      closeDialog();
     } catch (error) {
-      console.error(error);
-      alert('Erro ao salvar banner. Verifique o console.');
+      console.error('Error saving banner:', error);
+      alert(`Erro ao salvar banner: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDelete = async (bannerId: string) => {
-    if (confirm('Tem certeza que deseja excluir este banner?')) {
-      try {
-        const response = await fetch(`/api/banners/${bannerId}`, { method: 'DELETE' });
-        if (!response.ok) throw new Error('Failed to delete banner');
-        await loadBanners();
-      } catch (error) {
-        console.error(error);
-        alert('Erro ao excluir banner. Verifique o console.');
-      }
+    if (!confirm('Tem certeza que deseja excluir este banner?')) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/banners/${bannerId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete banner');
+      await loadBanners();
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+      alert('Erro ao excluir banner. Verifique o console.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const toggleActive = async (banner: Banner) => {
     try {
+      setIsLoading(true);
       const response = await fetch(`/api/banners/${banner.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -114,8 +133,10 @@ export function BannerManagement() {
       if (!response.ok) throw new Error('Failed to toggle banner status');
       await loadBanners();
     } catch (error) {
-      console.error(error);
+      console.error('Error toggling banner status:', error);
       alert('Erro ao alterar status do banner. Verifique o console.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -132,7 +153,7 @@ export function BannerManagement() {
         <h2 className="text-2xl font-bold">Gerenciar Banners</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => openDialog()}>
+            <Button onClick={() => openDialog()} disabled={isLoading}>
               <Plus className="w-4 h-4 mr-2" />
               Novo Banner
             </Button>
@@ -149,6 +170,7 @@ export function BannerManagement() {
                 placeholder="Título do banner"
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
+                disabled={isLoading}
               />
 
               <div className="space-y-2">
@@ -157,13 +179,20 @@ export function BannerManagement() {
                   placeholder="URL da imagem"
                   value={formData.image}
                   onChange={(e) => setFormData({...formData, image: e.target.value})}
+                  disabled={isLoading}
                 />
                 {formData.image && (
-                  <img
-                    src={formData.image}
-                    alt="Preview"
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
+                  <div className="relative">
+                    <img
+                      src={formData.image}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        alert('Erro ao carregar imagem. Verifique a URL.');
+                      }}
+                    />
+                  </div>
                 )}
               </div>
 
@@ -171,6 +200,7 @@ export function BannerManagement() {
                 placeholder="Link do banner (opcional)"
                 value={formData.link}
                 onChange={(e) => setFormData({...formData, link: e.target.value})}
+                disabled={isLoading}
               />
 
               <label className="flex items-center space-x-2">
@@ -178,15 +208,16 @@ export function BannerManagement() {
                   type="checkbox"
                   checked={formData.active}
                   onChange={(e) => setFormData({...formData, active: e.target.checked})}
+                  disabled={isLoading}
                 />
                 <span>Banner ativo</span>
               </label>
 
               <div className="flex gap-2">
-                <Button onClick={handleSave} className="flex-1">
-                  {editingBanner ? 'Atualizar' : 'Criar'} Banner
+                <Button onClick={handleSave} className="flex-1" disabled={isLoading}>
+                  {isLoading ? 'Salvando...' : (editingBanner ? 'Atualizar' : 'Criar') + ' Banner'}
                 </Button>
-                <Button variant="outline" onClick={closeDialog}>
+                <Button variant="outline" onClick={closeDialog} disabled={isLoading}>
                   Cancelar
                 </Button>
               </div>
@@ -194,6 +225,12 @@ export function BannerManagement() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {isLoading && (
+        <div className="text-center py-4">
+          <p>Carregando...</p>
+        </div>
+      )}
 
       <div className="grid gap-4">
         {banners.map((banner) => (
@@ -204,6 +241,9 @@ export function BannerManagement() {
                   src={banner.image}
                   alt={banner.title}
                   className="w-32 h-20 object-cover rounded-lg"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://via.placeholder.com/128x80/CCCCCC/666666?text=Erro';
+                  }}
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -221,13 +261,14 @@ export function BannerManagement() {
                     size="sm"
                     variant="outline"
                     onClick={() => toggleActive(banner)}
+                    disabled={isLoading}
                   >
                     {banner.active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
-                  <Button size="sm" onClick={() => openDialog(banner)}>
+                  <Button size="sm" onClick={() => openDialog(banner)} disabled={isLoading}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDelete(banner.id)}>
+                  <Button size="sm" variant="destructive" onClick={() => handleDelete(banner.id)} disabled={isLoading}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
