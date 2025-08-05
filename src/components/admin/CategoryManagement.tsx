@@ -78,7 +78,7 @@ export function CategoryManagement() {
       if (!response.ok) throw new Error('Failed to save category');
       
       await loadCategories();
-      closeDialog();
+    closeDialog();
     } catch (error) {
       console.error(error);
       alert('Erro ao salvar categoria.');
@@ -171,7 +171,7 @@ export function CategoryManagement() {
                 <div>
                   <h3 className="font-semibold text-lg">{category.name}</h3>
                   <p className="text-sm text-gray-600">{category.description}</p>
-                   <Button
+                  <Button
                     size="sm"
                     variant="outline"
                     onClick={() => window.open(`/categoria/${category.id}`, '_blank')}

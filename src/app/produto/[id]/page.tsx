@@ -6,9 +6,10 @@ import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/useCart';
-import { ArrowLeft, ShoppingCart, Heart, Share2, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Share2, Minus, Plus, Check } from 'lucide-react';
 import Image from 'next/image';
 import type { Product } from '@/data/products';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductPage() {
   const params = useParams();
@@ -18,9 +19,15 @@ export default function ProductPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
+  const [detalhesImageUrl, setDetalhesImageUrl] = useState('');
+  const [imageError, setImageError] = useState(false);
   const { addItem, formatPrice } = useCart();
+  const { toast } = useToast();
 
   const sizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44'];
+
+  // URL de fallback local
+  const fallbackImageUrl = '/detalhes.png';
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -39,8 +46,47 @@ export default function ProductPage() {
         setLoading(false);
       }
     };
+
+    // Carregar imagem de detalhes do localStorage ou usar fallback
+    if (typeof window !== 'undefined') {
+      try {
+        const customImages = localStorage.getItem('proboots-custom-images');
+        console.log('Custom images from localStorage:', customImages);
+        
+        if (customImages) {
+          const images = JSON.parse(customImages);
+          console.log('Parsed images:', images);
+          
+          if (images.detalhes && images.detalhes.trim() !== '') {
+            console.log('Using custom detalhes image:', images.detalhes);
+            setDetalhesImageUrl(images.detalhes);
+          } else {
+            console.log('No custom detalhes image found, using fallback');
+            setDetalhesImageUrl(fallbackImageUrl);
+          }
+        } else {
+          console.log('No custom images in localStorage, using fallback');
+          setDetalhesImageUrl(fallbackImageUrl);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar imagem de detalhes:', error);
+        setDetalhesImageUrl(fallbackImageUrl);
+      }
+    }
+
     fetchProduct();
   }, [params.id]);
+
+  const handleImageError = () => {
+    console.error('Erro ao carregar imagem de detalhes');
+    setImageError(true);
+  };
+
+  // Log da URL da imagem para debug
+  useEffect(() => {
+    console.log('Current detalhes image URL:', detalhesImageUrl);
+    console.log('Image error state:', imageError);
+  }, [detalhesImageUrl, imageError]);
 
   if (loading) {
     return (
@@ -60,7 +106,7 @@ export default function ProductPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <p className="text-gray-500">Produto não encontrado</p>
-            <Button onClick={() => router.push('/')} className="mt-4">
+            <Button onClick={() => router.push('/')}>
               Voltar ao início
             </Button>
           </div>
@@ -71,11 +117,19 @@ export default function ProductPage() {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert('Por favor, selecione um tamanho');
+      toast({
+        title: '⚠️ Tamanho não selecionado',
+        description: 'Por favor, selecione um tamanho antes de adicionar ao carrinho.',
+        variant: 'destructive',
+      });
       return;
     }
     addItem(product, quantity, selectedSize);
-    alert('Produto adicionado ao carrinho!');
+    toast({
+      title: '🛒 Produto adicionado ao carrinho!',
+      description: `${product.name} (Tamanho: ${selectedSize}) foi adicionado com sucesso.`,
+      variant: 'cart',
+    });
   };
 
   return (
@@ -111,7 +165,7 @@ export default function ProductPage() {
               </Badge>
             )}
             {!product.inStock && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                 <span className="text-white font-bold">FORA DE ESTOQUE</span>
               </div>
             )}
@@ -250,6 +304,15 @@ export default function ProductPage() {
           <p className="text-gray-700 leading-relaxed mb-4">
             {product.description}
           </p>
+          <div className="mt-6">
+            <img
+              src={imageError ? fallbackImageUrl : detalhesImageUrl}
+              alt="Tabela de medidas do produto"
+              className="w-full rounded-lg"
+              onError={handleImageError}
+              onLoad={() => setImageError(false)}
+            />
+          </div>
         </div>
 
         {/* Especificações */}

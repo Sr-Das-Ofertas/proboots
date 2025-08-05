@@ -45,25 +45,25 @@ export function BannerCarousel() {
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative w-full h-screen md:h-96 overflow-hidden" ref={emblaRef}>
+    <div className="relative w-full h-screen overflow-hidden box-border pt-36" ref={emblaRef}>
       <div className="flex h-full">
-        {banners.map((banner, index) => (
-          <div
-            key={banner.id}
+      {banners.map((banner, index) => (
+        <div
+          key={banner.id}
             className="flex-shrink-0 w-full h-full relative"
-          >
-            <div className="relative w-full h-full">
-              <Image
-                src={banner.image}
-                alt={banner.title}
-                fill
+        >
+          <div className="relative w-full h-full">
+            <Image
+              src={banner.image}
+              alt={banner.title}
+              fill
                 className="object-contain"
-                priority={index === 0}
-              />
+              priority={index === 0}
+            />
             </div>
           </div>
         ))}
-      </div>
+        </div>
 
       {/* Indicadores */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">

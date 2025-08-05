@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DataStore, Product, Category, Banner } from '@/data/products';
+import { Product, Category, Banner } from '@/data/products';
 import { ProductManagement } from '@/components/admin/ProductManagement';
 import { CategoryManagement } from '@/components/admin/CategoryManagement';
 import { BannerManagement } from '@/components/admin/BannerManagement';
+import { SettingsManagement } from '@/components/admin/SettingsManagement';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 
 export default function AdminPage() {
@@ -91,10 +92,11 @@ export default function AdminPage() {
 
       <main className="p-4">
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="products">Produtos</TabsTrigger>
             <TabsTrigger value="categories">Categorias</TabsTrigger>
             <TabsTrigger value="banners">Banners</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
             <TabsTrigger value="images">Imagens</TabsTrigger>
           </TabsList>
 
@@ -108,6 +110,10 @@ export default function AdminPage() {
 
           <TabsContent value="banners">
             <BannerManagement />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SettingsManagement />
           </TabsContent>
 
           <TabsContent value="images">

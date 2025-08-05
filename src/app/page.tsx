@@ -16,7 +16,7 @@ export default function Home() {
 
         {/* Categorias Principais */}
         <section className="-mt-12 z-10 relative md:mt-0 md:pt-40">
-          <CategoryGrid categoryIds={['campo', 'society', 'futsal']} />
+        <CategoryGrid categoryIds={['campo', 'society', 'futsal']} />
         </section>
 
         {/* Mais Vendidos */}

@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        'proboots-red': '#5c1b1c',
+        'proboots-red': '#960607',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))', 
         card: {

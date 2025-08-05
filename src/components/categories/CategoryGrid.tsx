@@ -19,12 +19,12 @@ export function CategoryGrid({ categoryIds, title }: CategoryGridProps) {
         const res = await fetch('/api/categories');
         if (!res.ok) throw new Error('Failed to fetch categories');
         const allCategories = await res.json();
-        
-        const filteredAndOrdered = categoryIds
+    
+    const filteredAndOrdered = categoryIds
           .map(id => allCategories.find((cat: Category) => cat.id === id))
-          .filter((cat): cat is Category => cat !== undefined);
-          
-        setCategories(filteredAndOrdered);
+      .filter((cat): cat is Category => cat !== undefined);
+      
+    setCategories(filteredAndOrdered);
       } catch (error) {
         console.error(error);
       }

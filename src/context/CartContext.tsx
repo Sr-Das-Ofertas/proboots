@@ -31,8 +31,6 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const WHATSAPP_NUMBER = "5599985306285";
-
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart>({
     items: [],
@@ -40,6 +38,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     itemCount: 0
   });
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState<string>('');
+
+  // Carregar configurações do WhatsApp
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const settings = await response.json();
+          setWhatsappNumber(settings.whatsappNumber);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar configurações do WhatsApp:', error);
+        // Fallback para um número padrão caso a API falhe
+        setWhatsappNumber('5511999999999');
+      }
+    };
+
+    loadSettings();
+  }, []);
 
   // Carregar carrinho do localStorage na inicialização
   useEffect(() => {
@@ -133,7 +151,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     message += "*DADOS DO CLIENTE:*\n";
     message += `Nome: ${userData.name}\n`;
     message += `CPF: ${userData.cpf}\n`;
-    message += `Telefone: ${userData.phone}\n\n`;
+    message += `Telefone: ${userData.phone}\n`;
+    
+    // Formatar endereço completo
+    const addressParts = [
+      userData.street,
+      userData.number,
+      userData.neighborhood,
+      `${userData.city} - ${userData.state}`,
+      `CEP: ${userData.cep}`
+    ];
+    if (userData.complement) {
+      addressParts.splice(2, 0, userData.complement);
+    }
+    message += `Endereço: ${addressParts.join(', ')}\n`;
+    message += `✅ Cliente concordou com envio via Transportadora Flex\n\n`;
 
     message += "----------\n\n";
     
@@ -154,8 +186,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       alert('Seu carrinho está vazio!');
       return;
     }
+
+    if (!whatsappNumber) {
+      alert('Número do WhatsApp não configurado. Entre em contato com o administrador.');
+      return;
+    }
+
     const message = generateWhatsAppMessage(userData);
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
     closeCheckoutModal();
   };

@@ -74,17 +74,17 @@ export function BannerManagement() {
         method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: formData.title,
-          image: formData.image,
-          link: formData.link || undefined,
-          active: formData.active
+      title: formData.title,
+      image: formData.image,
+      link: formData.link || undefined,
+      active: formData.active
         })
       });
 
       if (!response.ok) throw new Error('Failed to save banner');
       
       await loadBanners();
-      closeDialog();
+    closeDialog();
     } catch (error) {
       console.error(error);
       alert('Erro ao salvar banner. Verifique o console.');
@@ -158,7 +158,7 @@ export function BannerManagement() {
                   value={formData.image}
                   onChange={(e) => setFormData({...formData, image: e.target.value})}
                 />
-                 {formData.image && (
+                {formData.image && (
                   <img
                     src={formData.image}
                     alt="Preview"

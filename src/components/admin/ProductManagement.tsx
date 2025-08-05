@@ -116,7 +116,7 @@ export function ProductManagement() {
       });
       if (!response.ok) throw new Error('Failed to save product');
       await loadData();
-      closeDialog();
+    closeDialog();
     } catch (error) {
       console.error(error);
       alert('Erro ao salvar produto.');

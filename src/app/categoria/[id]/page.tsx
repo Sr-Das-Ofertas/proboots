@@ -30,13 +30,13 @@ export default function CategoryPage() {
         const allCategories: Category[] = await catRes.json();
         const allProducts: Product[] = await prodRes.json();
         
-        const categoryId = params.id as string;
+    const categoryId = params.id as string;
         const foundCategory = allCategories.find(c => c.id === categoryId);
         
-        if (foundCategory) {
+    if (foundCategory) {
           setCategory(foundCategory);
           const categoryProducts = allProducts.filter(p => p.category === categoryId);
-          setProducts(categoryProducts);
+      setProducts(categoryProducts);
         } else {
           setCategory(null);
           setProducts([]);
@@ -78,7 +78,7 @@ export default function CategoryPage() {
       <Header />
       <main className="pt-24 md:pt-32">
         <section className="text-center p-6 bg-white shadow-md">
-          <h1 className="text-3xl font-bold text-blue-800">{category.name}</h1>
+          <h1 className="text-3xl font-bold text-proboots-red">{category.name}</h1>
           <p className="text-gray-600 mt-2">{category.description}</p>
         </section>
 

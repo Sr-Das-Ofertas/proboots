@@ -30,7 +30,7 @@ export function Header() {
       >
       {/* Barra de frete grátis */}
         <div className={cn(
-          "text-center py-2 text-sm",
+          "text-center py-1 text-xs",
           isHomePage ? "bg-proboots-red/90" : "bg-proboots-red"
         )}>
         ⚡ Frete grátis para todo o Brasil
@@ -39,13 +39,12 @@ export function Header() {
       {/* Header principal */}
         <div className={cn(
           "transition-all duration-300",
-          isHomePage ? "bg-proboots-red/90" : "bg-proboots-red",
-          isSearchOpen ? 'py-4' : ''
+          isHomePage ? "bg-proboots-red/90" : "bg-proboots-red"
         )}>
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-2">
           {/* Menu hamburger (mobile) */}
             <Button variant="ghost" size="sm" className="md:hidden">
-            <Menu className="w-5 h-5" />
+            <Menu className="w-4 h-4" />
           </Button>
 
           {/* Logo */}
@@ -53,19 +52,19 @@ export function Header() {
             <img
               src="/logo.png"
               alt="Proboots Logo"
-              className="h-20 w-auto"
+              className="h-12 w-auto"
             />
           </div>
 
             {/* Ícones da direita */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="relative"
               >
-                {isSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+                {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
               </Button>
 
           <Button
@@ -74,9 +73,9 @@ export function Header() {
             onClick={() => setIsCartOpen(true)}
                 className="relative"
           >
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-4 h-4" />
             {cart.itemCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs bg-red-500">
+                  <Badge className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center text-[10px] bg-red-500">
                 {cart.itemCount}
               </Badge>
             )}
@@ -86,14 +85,14 @@ export function Header() {
 
           {/* Barra de pesquisa expansível */}
           {isSearchOpen && (
-            <div className="px-4 pb-4 animate-fadeIn">
+            <div className="px-2 pb-2 animate-fadeIn">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-3 h-3" />
             <Input
               placeholder="O que está procurando?"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white/20 border-white/30 placeholder:text-gray-300"
+                  className="pl-9 bg-white/20 border-white/30 placeholder:text-gray-300 text-sm"
             />
           </div>
             </div>

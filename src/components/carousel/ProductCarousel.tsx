@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/hooks/useCart';
-import type { Product } from '@/data/products';
+import { useToast } from '@/hooks/use-toast';
+import { Product } from '@/data/products';
 
 interface ProductCarouselProps {
   title: string;
@@ -19,7 +20,8 @@ interface ProductCarouselProps {
 export function ProductCarousel({ title, type, categoryId }: ProductCarouselProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const router = useRouter();
-  const { formatPrice } = useCart();
+  const { addItem, formatPrice } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,6 +51,16 @@ export function ProductCarousel({ title, type, categoryId }: ProductCarouselProp
     };
     fetchProducts();
   }, [type, categoryId]);
+
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation();
+    addItem(product, 1);
+    toast({
+      title: '🛒 Produto adicionado ao carrinho!',
+      description: `${product.name} foi adicionado com sucesso.`,
+      variant: 'cart',
+    });
+  };
 
   if (products.length === 0) return null;
 
@@ -103,14 +115,11 @@ export function ProductCarousel({ title, type, categoryId }: ProductCarouselProp
 
               <Button
                 size="sm"
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push(`/produto/${product.id}`);
-                }}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-xs"
+                onClick={(e) => handleAddToCart(product, e)}
               >
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Ver Detalhes
+                <ShoppingCart className="w-3 h-3 mr-1" />
+                Adicionar
               </Button>
             </CardContent>
           </Card>
