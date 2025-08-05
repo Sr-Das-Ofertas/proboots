@@ -29,6 +29,7 @@ COPY --from=base /app/next.config.js ./next.config.js
 COPY --from=base /app/tailwind.config.ts ./tailwind.config.ts
 COPY --from=base /app/tsconfig.json ./tsconfig.json
 COPY --from=base /app/src/db ./src/db
+COPY --from=base /app/src/app/globals.css ./src/app/globals.css
 
 # Install only production dependencies
 RUN bun install --frozen-lockfile --production

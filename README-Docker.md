@@ -61,6 +61,24 @@ docker-compose up -d --build
 
 ## 🛠️ Troubleshooting
 
+### **Problema: "Module not found: Can't resolve './index.module.css'"**
+
+Se você ver este erro nos logs:
+
+```bash
+# Parar containers
+docker-compose down
+
+# Limpar cache do Docker
+docker system prune -f
+
+# Rebuild sem cache
+docker-compose build --no-cache
+
+# Iniciar containers
+docker-compose up -d
+```
+
 ### **Problema: Healthcheck falhando**
 
 Se o healthcheck estiver falhando, execute:
@@ -96,6 +114,7 @@ docker-compose logs --tail=50
 2. **Erro de build:** Verifique se o `Dockerfile` está correto
 3. **Dados não persistem:** Verifique o volume `./src/db:/app/src/db`
 4. **Healthcheck falhando:** O curl agora está instalado no Dockerfile
+5. **CSS não encontrado:** O `globals.css` agora está sendo copiado corretamente
 
 ## 📁 Estrutura dos Arquivos
 
@@ -136,6 +155,7 @@ docker-compose up -d --build
 - Health checks configurados com curl
 - Restart automático
 - Endpoint `/api/health` para monitoramento
+- Arquivos CSS copiados corretamente
 
 ## 📊 Monitoramento
 
@@ -151,6 +171,13 @@ O endpoint `/api/health` verifica:
 - ✅ Acesso aos arquivos de dados
 - ✅ Timestamp da verificação
 - ✅ Retorna JSON com status
+
+## 🎯 Correções Recentes
+
+### **CSS Module Error (Resolvido)**
+- ✅ Adicionado `COPY --from=base /app/src/app/globals.css ./src/app/globals.css`
+- ✅ Garantido que todos os arquivos CSS necessários são copiados
+- ✅ Build otimizado para produção
 
 ---
 
