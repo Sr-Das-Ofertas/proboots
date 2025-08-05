@@ -34,8 +34,13 @@ COPY --from=base /app/src/app/globals.css ./src/app/globals.css
 # Install only production dependencies
 RUN bun install --frozen-lockfile --production
 
+# Set environment variables for better performance
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
 # Expose port
 EXPOSE 3000
 
-# Start the application
+# Start the application with optimized settings
 CMD ["bun", "start"] 
