@@ -53,16 +53,59 @@ docker-compose exec app sh
 
 # Acessar container do Nginx
 docker-compose exec nginx sh
+
+# Rebuild após mudanças no código
+docker-compose down
+docker-compose up -d --build
 ```
+
+## 🛠️ Troubleshooting
+
+### **Problema: Healthcheck falhando**
+
+Se o healthcheck estiver falhando, execute:
+
+```bash
+# Parar containers
+docker-compose down
+
+# Rebuild com curl instalado
+docker-compose up -d --build
+
+# Verificar health status
+docker ps
+```
+
+### **Verificar se está funcionando:**
+```bash
+# Testar aplicação
+curl http://localhost:3000
+
+# Testar health check
+curl http://localhost:3000/api/health
+
+# Verificar containers
+docker ps
+
+# Ver logs de erro
+docker-compose logs --tail=50
+```
+
+### **Problemas comuns:**
+1. **Porta 3000 ocupada:** Mude a porta no `docker-compose.yml`
+2. **Erro de build:** Verifique se o `Dockerfile` está correto
+3. **Dados não persistem:** Verifique o volume `./src/db:/app/src/db`
+4. **Healthcheck falhando:** O curl agora está instalado no Dockerfile
 
 ## 📁 Estrutura dos Arquivos
 
 ```
 proboots/
-├── Dockerfile              # Build da aplicação Next.js
+├── Dockerfile              # Build da aplicação Next.js (com curl)
 ├── docker-compose.yml      # Orquestração dos containers
 ├── nginx.conf             # Configuração do Nginx
 ├── .dockerignore          # Arquivos ignorados no build
+├── src/app/api/health/    # Endpoint de health check
 └── src/
     └── db/                # Dados JSON (persistidos via volume)
 ```
@@ -90,33 +133,24 @@ docker-compose up -d --build
 ### **Aplicação**
 - Porta interna: 3000
 - Volume para persistir dados JSON
-- Health checks configurados
+- Health checks configurados com curl
 - Restart automático
-
-## 🔍 Troubleshooting
-
-### **Verificar se está funcionando:**
-```bash
-# Testar aplicação
-curl http://localhost:3000
-
-# Verificar containers
-docker ps
-
-# Ver logs de erro
-docker-compose logs --tail=50
-```
-
-### **Problemas comuns:**
-1. **Porta 3000 ocupada:** Mude a porta no `docker-compose.yml`
-2. **Erro de build:** Verifique se o `Dockerfile` está correto
-3. **Dados não persistem:** Verifique o volume `./src/db:/app/src/db`
+- Endpoint `/api/health` para monitoramento
 
 ## 📊 Monitoramento
 
 Os containers têm health checks configurados:
-- **App:** Testa endpoint `/api/banners`
+- **App:** Testa endpoint `/api/health` (com curl instalado)
 - **Nginx:** Testa se responde na porta 80
+- **Start period:** 40s para dar tempo da aplicação inicializar
+
+## 🔍 Health Check
+
+O endpoint `/api/health` verifica:
+- ✅ Status da aplicação
+- ✅ Acesso aos arquivos de dados
+- ✅ Timestamp da verificação
+- ✅ Retorna JSON com status
 
 ---
 
